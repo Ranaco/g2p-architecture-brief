@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>G2P Fund-Traceability — Architecture Brief</title>
+<style>html{-webkit-text-size-adjust:100%}img{max-width:100%}</style>
+<style>
+  :root{
+    /* neutrals biased cool toward the ink-indigo accent — chosen, not defaulted */
+    --paper:#f5f6f9; --surface:#ffffff; --surface-2:#eef0f6; --line:#dde1ec; --line-strong:#c6ccdd;
+    --ink:#161b2e; --muted:#525a72; --faint:#8189a1;
+    --accent:#2f3d78;        /* ledger indigo — the seal */
+    --accent-2:#4356a6;      /* lighter indigo for links/emphasis */
+    --verified:#1f7a5a;      /* green = confirmed / on rails */
+    --verified-bg:#e4f1ea;
+    --flag:#a86a12;          /* amber = flag for investigation */
+    --flag-bg:#f6ecd8;
+    --danger:#a2453b;        /* rust = custodial / do-not */
+    --danger-bg:#f4e2df;
+    --code-bg:#141a30; --code-ink:#d7deef; --code-faint:#7f8bb0; --code-key:#8fd6c0; --code-str:#e6c98a;
+    --shadow:0 1px 2px rgba(20,27,46,.05), 0 10px 30px -14px rgba(20,27,46,.18);
+    --radius:12px;
+    --serif:"Iowan Old Style","Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono","Menlo","Consolas",monospace;
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --paper:#0c0f1a; --surface:#131829; --surface-2:#1a2036; --line:#262d45; --line-strong:#374064;
+    --ink:#e9ecf6; --muted:#a3abc4; --faint:#6d769a;
+    --accent:#8b9ae0; --accent-2:#a7b3ec;
+    --verified:#4fc79c; --verified-bg:#12271f;
+    --flag:#dca94b; --flag-bg:#2c2411;
+    --danger:#e0857b; --danger-bg:#2e1a17;
+    --code-bg:#0a0f1e; --code-ink:#cdd6ee; --code-faint:#6c78a0;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 12px 34px -16px rgba(0,0,0,.7);
+  }}
+  :root[data-theme="light"]{
+    --paper:#f5f6f9; --surface:#ffffff; --surface-2:#eef0f6; --line:#dde1ec; --line-strong:#c6ccdd;
+    --ink:#161b2e; --muted:#525a72; --faint:#8189a1; --accent:#2f3d78; --accent-2:#4356a6;
+    --verified:#1f7a5a; --verified-bg:#e4f1ea; --flag:#a86a12; --flag-bg:#f6ecd8; --danger:#a2453b; --danger-bg:#f4e2df;
+    --code-bg:#141a30; --code-ink:#d7deef; --code-faint:#7f8bb0;
+    --shadow:0 1px 2px rgba(20,27,46,.05), 0 10px 30px -14px rgba(20,27,46,.18);
+  }
+  :root[data-theme="dark"]{
+    --paper:#0c0f1a; --surface:#131829; --surface-2:#1a2036; --line:#262d45; --line-strong:#374064;
+    --ink:#e9ecf6; --muted:#a3abc4; --faint:#6d769a; --accent:#8b9ae0; --accent-2:#a7b3ec;
+    --verified:#4fc79c; --verified-bg:#12271f; --flag:#dca94b; --flag-bg:#2c2411; --danger:#e0857b; --danger-bg:#2e1a17;
+    --code-bg:#0a0f1e; --code-ink:#cdd6ee; --code-faint:#6c78a0;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 12px 34px -16px rgba(0,0,0,.7);
+  }
+
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.62;
+    -webkit-font-smoothing:antialiased;font-size:16.5px;}
+  .wrap{max-width:768px;margin:0 auto;padding:64px 24px 88px;}
+
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--accent);font-weight:600;}
+  h1{font-family:var(--serif);font-weight:700;font-size:clamp(31px,5.4vw,46px);line-height:1.08;
+    letter-spacing:-.01em;margin:16px 0 14px;text-wrap:balance;}
+  .lede{font-size:clamp(16px,2.1vw,18.5px);color:var(--muted);max-width:60ch;margin:0;}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px;}
+  .chip{font-family:var(--mono);font-size:11px;padding:5px 11px;border-radius:999px;
+    border:1px solid var(--line-strong);color:var(--muted);background:var(--surface);white-space:nowrap;}
+  .chip b{color:var(--ink);font-weight:600;}
+
+  section{padding-top:52px;}
+  h2{font-family:var(--serif);font-weight:700;font-size:clamp(20px,3.1vw,26px);letter-spacing:-.01em;
+    margin:0 0 6px;text-wrap:balance;}
+  .kicker{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--faint);font-weight:600;display:block;margin-bottom:14px;}
+  p{margin:0 0 14px;} p:last-child{margin-bottom:0;}
+  .sub{color:var(--muted);max-width:64ch;}
+  strong{color:var(--ink);font-weight:650;}
+  code{font-family:var(--mono);font-size:.82em;background:var(--surface-2);padding:1px 5px;
+    border-radius:5px;border:1px solid var(--line);}
+
+  /* thesis callout */
+  .thesis{background:var(--accent);color:#fff;border-radius:var(--radius);padding:26px 28px;box-shadow:var(--shadow);}
+  :root[data-theme="dark"] .thesis{background:var(--surface);border:1px solid var(--accent);color:var(--ink);}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .thesis{background:var(--surface);border:1px solid var(--accent);color:var(--ink);}}
+  .thesis .tl{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+    opacity:.82;font-weight:600;}
+  :root[data-theme="dark"] .thesis .tl{color:var(--accent);opacity:1;}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .thesis .tl{color:var(--accent);opacity:1;}}
+  .thesis p{font-family:var(--serif);font-size:clamp(18px,2.6vw,22px);line-height:1.4;margin:10px 0 0;}
+
+  /* layer stack */
+  .stack{display:flex;flex-direction:column;gap:9px;}
+  .layer{display:grid;grid-template-columns:96px 1fr;gap:0;background:var(--surface);
+    border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);}
+  .layer .role{background:var(--surface-2);display:flex;flex-direction:column;justify-content:center;
+    gap:2px;padding:14px 12px;border-right:1px solid var(--line);}
+  .layer .role .rn{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--faint);}
+  .layer .role .rt{font-family:var(--mono);font-size:12.5px;font-weight:700;letter-spacing:.02em;color:var(--accent);text-transform:uppercase;}
+  .layer .body{padding:13px 16px;font-size:13.5px;color:var(--muted);}
+  .layer .body b{color:var(--ink);}
+  .layer.off .role{border-left:3px solid var(--verified);}
+  .layer.hero .role{border-left:3px solid var(--accent);}
+  .flowmark{font-family:var(--mono);font-size:10px;color:var(--faint);text-align:center;letter-spacing:.1em;}
+
+  /* two-column split */
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px 20px;box-shadow:var(--shadow);}
+  .card .tag{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
+    display:inline-block;padding:3px 9px;border-radius:6px;margin-bottom:10px;}
+  .card.gate .tag{background:var(--flag-bg);color:var(--flag);}
+  .card.witness .tag{background:var(--verified-bg);color:var(--verified);}
+  .card h3{font-family:var(--sans);font-size:15px;margin:0 0 6px;letter-spacing:-.01em;}
+  .card p{font-size:13px;color:var(--muted);margin:0;}
+  .card p + p{margin-top:8px;}
+
+  /* code block */
+  pre{margin:0;background:var(--code-bg);color:var(--code-ink);font-family:var(--mono);font-size:12.5px;
+    line-height:1.62;padding:18px 20px;border-radius:10px;overflow-x:auto;box-shadow:var(--shadow);}
+  pre .c{color:var(--code-faint);} pre .k{color:var(--code-key);} pre .s{color:var(--code-str);}
+
+  .note{border-radius:10px;padding:14px 17px;font-size:13px;border:1px solid;margin-top:14px;}
+  .note .nl{font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;
+    display:block;margin-bottom:5px;}
+  .note.flag{background:var(--flag-bg);border-color:var(--flag);color:var(--muted);}
+  .note.flag .nl{color:var(--flag);} .note.flag strong{color:var(--ink);}
+
+  /* precedent rows */
+  .prec{display:flex;flex-direction:column;gap:0;border:1px solid var(--line);border-radius:var(--radius);
+    overflow:hidden;box-shadow:var(--shadow);background:var(--surface);}
+  .prec .row{display:grid;grid-template-columns:150px 1fr;gap:0;padding:14px 0;border-bottom:1px solid var(--line);}
+  .prec .row:last-child{border-bottom:none;}
+  .prec .who{padding:0 16px;border-right:1px solid var(--line);}
+  .prec .who .nm{font-weight:650;font-size:14px;color:var(--ink);}
+  .prec .who .meta{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:2px;}
+  .prec .what{padding:0 16px;font-size:13px;color:var(--muted);}
+  .prec .what b{color:var(--ink);}
+  .prec .what .neg{color:var(--danger);font-weight:600;}
+
+  ul.facts{list-style:none;margin:14px 0 0;padding:0;display:flex;flex-direction:column;gap:9px;}
+  ul.facts li{display:flex;gap:11px;font-size:13.5px;color:var(--muted);}
+  ul.facts li .m{font-family:var(--mono);color:var(--accent);font-weight:700;flex-shrink:0;}
+  ul.facts li b{color:var(--ink);}
+
+  /* before / after comparison */
+  .diff{display:flex;flex-direction:column;gap:9px;}
+  .diff-head{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+  .diff-head .dh{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
+    font-weight:700;padding:9px 14px;border-radius:8px;}
+  .diff-head .dh.old{background:var(--danger-bg);color:var(--danger);}
+  .diff-head .dh.new{background:var(--verified-bg);color:var(--verified);}
+  .drow{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:var(--shadow);}
+  .drow .dim{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);
+    padding:9px 14px 0;font-weight:600;}
+  .drow .cells{display:grid;grid-template-columns:1fr 1fr;gap:0;}
+  .drow .cell{padding:7px 14px 13px;font-size:12.8px;color:var(--muted);}
+  .drow .cell.old{border-right:1px solid var(--line);}
+  .drow .cell b{color:var(--ink);}
+  .drow .cell .x{color:var(--danger);font-weight:800;margin-right:2px;}
+  .drow .cell .c{color:var(--verified);font-weight:800;margin-right:2px;}
+  @media (max-width:640px){
+    .diff-head{grid-template-columns:1fr;gap:6px;}
+    .drow .cells{grid-template-columns:1fr;}
+    .drow .cell.old{border-right:none;border-bottom:1px solid var(--line);}
+  }
+
+  /* fork */
+  .fork{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;}
+  .branch{border-radius:var(--radius);padding:18px 20px;border:1px solid;box-shadow:var(--shadow);}
+  .branch .bh{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;
+    font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+  .branch h3{font-family:var(--sans);font-size:14.5px;margin:0 0 6px;letter-spacing:-.01em;}
+  .branch p{font-size:13px;color:var(--muted);margin:0;}
+  .branch.yes{background:var(--verified-bg);border-color:var(--verified);}
+  .branch.yes .bh{color:var(--verified);} .branch.yes h3{color:var(--ink);}
+  .branch.no{background:var(--surface-2);border-color:var(--line-strong);}
+  .branch.no .bh{color:var(--muted);} .branch.no h3{color:var(--ink);}
+
+  footer{margin-top:60px;padding-top:22px;border-top:1px solid var(--line);color:var(--faint);font-size:12px;}
+  footer p{margin:0 0 8px;} footer strong{color:var(--muted);}
+  footer .src{font-family:var(--mono);font-size:10.5px;line-height:1.7;}
+
+  a{color:var(--accent-2);text-underline-offset:2px;}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+  @media (max-width:640px){
+    .split,.fork{grid-template-columns:1fr;}
+    .layer{grid-template-columns:82px 1fr;}
+    .prec .row{grid-template-columns:1fr;gap:6px;}
+    .prec .who{border-right:none;}
+  }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="eyebrow">G2P Fund-Traceability · Architecture Brief</span>
+    <h1>Prove where every dollar went — without a blockchain ever touching the money.</h1>
+    <p class="lede">A government pays 10,000 citizens $1 each through commercial banks. The goal is not to move that money on-chain — it is to make the <em>record</em> of it impossible for any single institution to forge or rewrite. Here is the simplest architecture that does that, and the one decision it hinges on.</p>
+    <div class="chips">
+      <span class="chip"><b>Non-custodial</b> · records, not money</span>
+      <span class="chip"><b>Chain off</b> the critical path</span>
+      <span class="chip"><b>Zero</b> Central-Bank APIs</span>
+    </div>
+  </header>
+
+  <section>
+    <div class="thesis">
+      <span class="tl">The one-line answer</span>
+      <p>A boring Postgres ledger is the source of truth; a <strong>managed 4-validator permissioned chain</strong>, each node held by a <em>different institution</em>, witnesses every step; a nightly hash is anchored to Bitcoin so not even the consortium can back-date it. Money never leaves the banking rails.</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="kicker">How it works · six tiers, one direction of flow</span>
+    <h2>The architecture</h2>
+    <p class="sub" style="margin-bottom:20px">Each tier has one job. A payment succeeds the instant the database commits — everything below the line is a subscriber that can lag, backlog, or go dark without ever freezing a disbursement.</p>
+    <div class="stack">
+      <div class="layer off"><div class="role"><span class="rn">tier 1</span><span class="rt">Money</span></div><div class="body">Moves on existing <b>bank / RTGS / ACH rails</b>. The platform never holds or transmits a cent. No tokenised currency — that would trigger e-money regulation.</div></div>
+      <div class="flowmark">▼ one local transaction ▼</div>
+      <div class="layer off"><div class="role"><span class="rn">tier 2</span><span class="rt">Truth</span></div><div class="body">One <b>append-only Postgres</b>. Payment lines + an <code>outbox</code> row written in the <b>same transaction</b>. This commit — nothing else — is what makes a payment real.</div></div>
+      <div class="layer"><div class="role"><span class="rn">tier 3</span><span class="rt">Control</span></div><div class="body"><b>Maker → checker → authorizer</b>, plus inter-institutional co-signatures, enforced in the app workflow. Money is not instructed until the required signatures exist. This is the real gate.</div></div>
+      <div class="flowmark">▼ async · off the critical path ▼</div>
+      <div class="layer hero"><div class="role"><span class="rn">tier 4</span><span class="rt">Witness</span></div><div class="body">A <b>managed permissioned chain</b> (Besu/QBFT via Kaleido or SettleMint). Four validators, one each held by <b>Finance Ministry · Central Bank · a third body · an independent NGO</b>. A relayer drains the outbox. One thin contract records signed status transitions.</div></div>
+      <div class="layer hero"><div class="role"><span class="rn">tier 5</span><span class="rt">Anchor</span></div><div class="body">Nightly <b>Merkle root → Bitcoin</b> (OpenTimestamps). This is what makes “even the consortium cannot rewrite history” <em>true</em> — forging it would mean rewriting Bitcoin.</div></div>
+      <div class="layer off"><div class="role"><span class="rn">tier 6</span><span class="rt">Reporting</span></div><div class="body">Dashboards read <b>Postgres projections, never the chain</b> — so reporting is always fast and always up, whatever the chain is doing.</div></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="kicker">What changed · the architectural shift</span>
+    <h2>From a single authority to independent custody</h2>
+    <p class="sub" style="margin-bottom:20px">The original sketch and this design share the same skeleton — non-custodial, records-not-money, chain off the critical path. They differ on the <em>one</em> thing that decides whether a blockchain earns its keep at all: <strong>who holds the validators, and who is allowed to authorize a step.</strong></p>
+    <div class="diff">
+      <div class="diff-head">
+        <span class="dh old">Previous · single authority</span>
+        <span class="dh new">New · independent consortium</span>
+      </div>
+      <div class="drow"><div class="dim">Who runs the nodes</div><div class="cells">
+        <div class="cell old">One entity — the executing agency holds operator, verifier <em>and</em> authorizer, and every validator runs under <b>one admin</b>.</div>
+        <div class="cell new">Four <b>distinct legal custodians</b> — Finance Ministry, Central Bank, a third body, and an independent NGO — one node each.</div>
+      </div></div>
+      <div class="drow"><div class="dim">Where trust comes from</div><div class="cells">
+        <div class="cell old">You still have to <b>trust the operator’s copy</b>; the nightly public anchor is the <em>only</em> external check.</div>
+        <div class="cell new">No single operator sits in the trust base — trust rests on <b>independent consensus</b> plus a mandatory outside signer.</div>
+      </div></div>
+      <div class="drow"><div class="dim">The independent auditor / NGO</div><div class="cells">
+        <div class="cell old">A <b>read-only observer</b>. It can verify the trail, but it gates nothing and signs nothing.</div>
+        <div class="cell new">A <b>validator and mandatory co-signer</b> — nothing advances without it, and it signs against external bank evidence.</div>
+      </div></div>
+      <div class="drow"><div class="dim">What a signature proves</div><div class="cells">
+        <div class="cell old">That the operator’s <b>own records</b> are internally consistent and unaltered.</div>
+        <div class="cell new">That <b>separate institutions each attested</b>, against bank-signed <code>camt.053</code> settlement evidence.</div>
+      </div></div>
+      <div class="drow"><div class="dim">The threat it actually stops</div><div class="cells">
+        <div class="cell old"><span class="x">✕</span>Accidental drift and outside tampering — <b>not</b> the operator itself.</div>
+        <div class="cell new"><span class="c">✓</span>Also the operator <b>unilaterally rewriting or colluding</b> — the real corruption threat.</div>
+      </div></div>
+    </div>
+    <div class="note flag">
+      <span class="nl">The crux, in one line</span>
+      The previous design proves <strong>the record wasn’t altered</strong>. This one proves <strong>no single institution could have altered it</strong>. The original brief actually conceded the point — “3–4 independently-operated validators, or it shouldn’t be called a blockchain project” — but parked it as a <em>Phase-2</em> aspiration. This design makes independence the <strong>day-one premise</strong>, because without it the chain is provably just a database.
+    </div>
+  </section>
+
+  <section>
+    <span class="kicker">The decision that trips everyone · block vs. witness</span>
+    <h2>Approval gates the money — the chain only witnesses it</h2>
+    <p class="sub" style="margin-bottom:18px">“Every regulator must approve before money moves” is the right control — but making that an <em>on-chain</em> gate is the trap. The only synchronous-gate precedent (Singapore’s Purpose-Bound Money) is <em>custodial</em>: it locks value inside the contract. That puts the chain on the critical path and pulls you under e-money law. So split it by volume:</p>
+    <div class="split">
+      <div class="card gate">
+        <span class="tag">Hard gate</span>
+        <h3>Inter-institutional transfers</h3>
+        <p>e.g. Central Bank → Ministry. A <b>handful</b>, high value. Require multi-signature (CB + Ministry + NGO), collected in the workflow <b>before</b> the instruction is released.</p>
+        <p>A slow NGO here delays one big transfer — tolerable.</p>
+      </div>
+      <div class="card witness">
+        <span class="tag">Witness + flag</span>
+        <h3>Mass citizen payouts</h3>
+        <p>e.g. Ministry → banks → 10,000 people. Far too many to gate on a live signature. Banks sign outcomes, citizens confirm receipt, the NGO audits the aggregate <b>after</b> the fact.</p>
+        <p>A missing signature <b>flags for investigation</b> — it never freezes benefits.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="kicker">What is written to the chain · and why so little</span>
+    <h2>Proofs, never data</h2>
+    <p class="sub" style="margin-bottom:18px">Regulators (EU’s EDPB, France’s CNIL) are explicit: an immutable ledger collides with the right to erasure. The resolution every serious project uses — put no personal data on-chain at all. Only commitments.</p>
+<pre><span class="c">// on-chain — per payment, ~5 fields, immutable</span>
+{
+  batchId,  itemId,  status,          <span class="c">// lifecycle state</span>
+  <span class="k">docHash</span>,                          <span class="c">// SHA-256 of the exact instruction</span>
+  <span class="k">commit</span>: HMAC(dni ‖ tenantSalt ‖ epochSalt), <span class="c">// keyed, salted, rotating</span>
+  signer,   timestamp
+}
+
+<span class="c">// off-chain — encrypted Postgres, erasable</span>
+{ <span class="s">name, dni, account, mobile, amount, geography</span>, hmacSalt }
+<span class="c">//                                          ↑ crypto-shred to "erase"</span></pre>
+    <div class="note flag">
+      <span class="nl">⚠ Exact, not hand-waved</span>
+      A <strong>plain</strong> hash of a national ID or phone number is brute-forceable in <strong>under a minute</strong> — a bare hash protects nothing. It must be a <strong>salted, keyed HMAC with rotating salts</strong>; deleting the salt is what performs erasure. Even then, regulators call this “close to compliant,” not true deletion — so a signed <strong>DPIA</strong> is a go-live requirement, not a nicety.
+    </div>
+  </section>
+
+  <section>
+    <span class="kicker">The last-mile problem · what makes an attestation real</span>
+    <h2>Anchor bank-signed proof, not “we paid”</h2>
+    <p class="sub">A hash proves a record is <em>unaltered</em> — not that money reached a person. So the NGO’s signature is only worth what it can independently see. Anchor <strong>bank-generated evidence</strong>, not the ministry’s own claim:</p>
+    <ul class="facts">
+      <li><span class="m">▹</span><span><b>ISO 20022 <code>camt.053</code> / <code>camt.054</code></b> — the receiving bank’s own statement that funds were <em>booked</em> to the beneficiary’s account, with machine-readable outcome codes (<code>BOOK</code>, <code>Settlement Failed</code>, <code>RDFI&nbsp;NonSettlement</code>). This distinguishes a real payout from a failed one.</span></li>
+      <li><span class="m">▹</span><span><b>Beneficiary confirmation</b> (SMS / USSD, or biometric cash-out for the unbanked) — the independent last-mile check that account-credit actually became cash-in-hand.</span></li>
+      <li><span class="m">▹</span><span>The NGO signs <b>against these external artifacts</b>. Signing against the ministry’s internal record instead is a rubber stamp — it just co-signs the same story.</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <span class="kicker">Why this exact shape · grounded in what shipped</span>
+    <h2>The precedents — and where they fall short</h2>
+    <div class="prec">
+      <div class="row"><div class="who"><div class="nm">World Bank FundsChain</div><div class="meta">2025 · Hyperledger Besu</div></div><div class="what">Permissioned, non-custodial, <b>only document hashes on-chain</b>, off the critical path. Real scale: 13 projects / 10 countries → ~250 by June 2026. <span class="neg">But single-owner today</span> — the Bank runs all nodes; independent validators are only a roadmap item.</div></div>
+      <div class="row"><div class="who"><div class="nm">UN WFP Building Blocks</div><div class="meta">$555M · 25M transactions</div></div><div class="what">Records, not money. <b>Abandoned public Ethereum</b> for permissioned. <span class="neg">But WFP alone controls the chain</span> — it can rewrite history; an official conceded the same result was achievable without any blockchain.</div></div>
+      <div class="row"><div class="who"><div class="nm">The lesson</div><div class="meta">why validators must be independent</div></div><div class="what">A permissioned chain run by <b>one</b> entity is provably no better than an audited append-only database. Your design — <b>independent validators from day one</b> — is more ambitious on trust than either flagship. That is the whole point of it.</div></div>
+    </div>
+    <ul class="facts" style="margin-top:18px">
+      <li><span class="m">62%</span><span>of <b>abandoned</b> enterprise chains cite <b>operational complexity</b> as the cause — not the cryptography (Hyperledger, 2024). 87% of pilots never reach production.</span></li>
+      <li><span class="m">~10×</span><span>Going from 1 to 4 independently-run nodes is roughly <b>ten times harder</b>, not four — per-org certificate authorities, key custody, cross-org governance.</span></li>
+      <li><span class="m">→</span><span>The simplicity lever that makes independence survivable: <b>managed blockchain-as-a-service</b> absorbs the PKI, HA, and monitoring. Four institutions hold keys; none runs the 3&nbsp;a.m. machinery.</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <span class="kicker">The one call that is yours, not the architecture’s</span>
+    <h2>Is independent validator custody actually achievable?</h2>
+    <p class="sub">Everything above is worth its cost <em>only</em> if the four validators sit under genuinely separate legal control. If they will realistically all be one agency, the blockchain adds nothing a database can’t. So:</p>
+    <div class="fork">
+      <div class="branch yes">
+        <div class="bh">✓ Yes — real custody</div>
+        <h3>Build the consortium chain above</h3>
+        <p>Central Bank + audit court/NGO each hold a key and run a managed node. You get a system genuinely stronger than FundsChain or WFP. Proceed exactly as specified.</p>
+      </div>
+      <div class="branch no">
+        <div class="bh">✕ No — one operator</div>
+        <h3>Drop the chain. Keep the anchor.</h3>
+        <p>Use an audited append-only Postgres + the nightly Bitcoin anchor. Same real tamper-evidence, <b>40–60% less ops cost</b>, none of the abandonment risk. The honest, simpler answer.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p><strong>Confidence &amp; method.</strong> Synthesised from a multi-source review (≈22 sources, 95 extracted claims, adversarially verified). Figures for FundsChain, WFP Building Blocks, the 62% abandonment cause, and ISO 20022 <code>camt.053</code> semantics were verified against primary and peer-reviewed sources. WFP’s “equal co-ownership” framing is contested by independent analyses and treated here as marketing.</p>
+    <p class="src">Primary precedents — World Bank FundsChain (Hyperledger Besu) · UN WFP Building Blocks · MAS Purpose-Bound Money · UNDP Haiti / Stellar · EDPB Guidelines 02/2025 &amp; CNIL on blockchain + GDPR · Hyperledger 2024 ecosystem report · ISO 20022 pain/camt.</p>
+    <p>Illustrative architecture brief · money-at-risk gaps (funding model, reconciliation state set, SoD in small units) are real regardless of the chain and must be resolved with the client before build.</p>
+  </footer>
+
+</div>
+</body>
+</html>

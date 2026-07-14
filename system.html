@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>G2P Disbursement — System One-Pager</title>
+<style>html{-webkit-text-size-adjust:100%}img{max-width:100%}</style>
+<style>
+  :root{
+    --paper:#f5f6f9; --surface:#ffffff; --surface-2:#eef0f6; --line:#dde1ec; --line-strong:#c6ccdd;
+    --ink:#161b2e; --muted:#525a72; --faint:#8189a1;
+    --accent:#2f3d78; --accent-2:#4356a6;
+    --verified:#1f7a5a; --verified-bg:#e4f1ea;
+    --flag:#a86a12; --flag-bg:#f6ecd8;
+    --danger:#a2453b; --danger-bg:#f4e2df;
+    --code-bg:#141a30; --code-ink:#d7deef; --code-faint:#7f8bb0; --code-key:#8fd6c0; --code-str:#e6c98a;
+    --shadow:0 1px 2px rgba(20,27,46,.05), 0 10px 30px -14px rgba(20,27,46,.18);
+    --serif:"Iowan Old Style","Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono","Menlo","Consolas",monospace;
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --paper:#0c0f1a; --surface:#131829; --surface-2:#1a2036; --line:#262d45; --line-strong:#374064;
+    --ink:#e9ecf6; --muted:#a3abc4; --faint:#6d769a; --accent:#8b9ae0; --accent-2:#a7b3ec;
+    --verified:#4fc79c; --verified-bg:#12271f; --flag:#dca94b; --flag-bg:#2c2411; --danger:#e0857b; --danger-bg:#2e1a17;
+    --code-bg:#0a0f1e; --code-ink:#cdd6ee; --code-faint:#6c78a0;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 12px 34px -16px rgba(0,0,0,.7);
+  }}
+  :root[data-theme="light"]{
+    --paper:#f5f6f9;--surface:#fff;--surface-2:#eef0f6;--line:#dde1ec;--line-strong:#c6ccdd;--ink:#161b2e;--muted:#525a72;--faint:#8189a1;--accent:#2f3d78;--accent-2:#4356a6;--verified:#1f7a5a;--verified-bg:#e4f1ea;--flag:#a86a12;--flag-bg:#f6ecd8;--danger:#a2453b;--danger-bg:#f4e2df;--code-bg:#141a30;--code-ink:#d7deef;--code-faint:#7f8bb0;--shadow:0 1px 2px rgba(20,27,46,.05),0 10px 30px -14px rgba(20,27,46,.18);
+  }
+  :root[data-theme="dark"]{
+    --paper:#0c0f1a;--surface:#131829;--surface-2:#1a2036;--line:#262d45;--line-strong:#374064;--ink:#e9ecf6;--muted:#a3abc4;--faint:#6d769a;--accent:#8b9ae0;--accent-2:#a7b3ec;--verified:#4fc79c;--verified-bg:#12271f;--flag:#dca94b;--flag-bg:#2c2411;--danger:#e0857b;--danger-bg:#2e1a17;--code-bg:#0a0f1e;--code-ink:#cdd6ee;--code-faint:#6c78a0;--shadow:0 1px 2px rgba(0,0,0,.4),0 12px 34px -16px rgba(0,0,0,.7);
+  }
+
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.55;
+    -webkit-font-smoothing:antialiased;font-size:15.5px;}
+  .wrap{max-width:820px;margin:0 auto;padding:52px 24px 72px;}
+
+  .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:600;}
+  h1{font-family:var(--serif);font-weight:700;font-size:clamp(27px,4.6vw,38px);line-height:1.08;letter-spacing:-.01em;margin:14px 0 12px;text-wrap:balance;}
+  .lede{font-size:clamp(15px,2vw,17px);color:var(--muted);max-width:62ch;margin:0;}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:18px;}
+  .chip{font-family:var(--mono);font-size:10.5px;padding:4px 10px;border-radius:999px;border:1px solid var(--line-strong);color:var(--muted);background:var(--surface);}
+  .chip b{color:var(--ink);font-weight:600;}
+
+  section{padding-top:40px;}
+  h2{font-family:var(--serif);font-weight:700;font-size:clamp(18px,2.7vw,23px);letter-spacing:-.01em;margin:0 0 4px;text-wrap:balance;}
+  .kicker{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:600;display:block;margin-bottom:12px;}
+  p{margin:0 0 12px;} p:last-child{margin-bottom:0;} .sub{color:var(--muted);max-width:64ch;}
+  strong{color:var(--ink);font-weight:650;}
+  code{font-family:var(--mono);font-size:.82em;background:var(--surface-2);padding:1px 5px;border-radius:5px;border:1px solid var(--line);}
+
+  /* claim split */
+  .claim{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .claim .c{border-radius:11px;padding:15px 17px;border:1px solid;box-shadow:var(--shadow);}
+  .claim .c .h{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:700;margin-bottom:8px;}
+  .claim .yes{background:var(--verified-bg);border-color:var(--verified);} .claim .yes .h{color:var(--verified);}
+  .claim .no{background:var(--flag-bg);border-color:var(--flag);} .claim .no .h{color:var(--flag);}
+  .claim ul{margin:0;padding-left:16px;} .claim li{font-size:12.8px;color:var(--muted);margin-bottom:5px;} .claim li:last-child{margin:0;} .claim li b{color:var(--ink);}
+
+  /* diagram frame */
+  .fig{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:16px 12px 10px;overflow-x:auto;}
+  .fig svg{display:block;width:100%;min-width:560px;height:auto;}
+  .figcap{font-size:11.5px;color:var(--faint);margin:8px 4px 0;font-style:italic;}
+  .dg .box{fill:var(--surface);stroke:var(--line-strong);stroke-width:1.4;}
+  .dg .ledger{fill:var(--accent);}
+  .dg .rail{fill:var(--verified-bg);stroke:var(--verified);stroke-width:1.4;}
+  .dg .conn{stroke:var(--line-strong);stroke-width:1.4;fill:none;}
+  .dg .flow{stroke:var(--verified);stroke-width:1.8;fill:none;}
+  .dg .divider{stroke:var(--faint);stroke-width:1.3;stroke-dasharray:6 5;}
+  .dg text{font-family:var(--sans);fill:var(--ink);}
+  .dg .t-node{font-size:12.5px;font-weight:650;}
+  .dg .t-sub{font-size:10px;fill:var(--muted);}
+  .dg .t-ledger{font-size:12.5px;font-weight:700;fill:#fff;}
+  .dg .t-lane{font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;fill:var(--faint);font-weight:600;}
+  .dg .t-div{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;fill:var(--faint);}
+  :root[data-theme="dark"] .dg .t-ledger{fill:#0c0f1a;}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .dg .t-ledger{fill:#0c0f1a;}}
+
+  /* quorum inline */
+  .quorum{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:14px 18px;box-shadow:var(--shadow);}
+  .quorum .dots{display:flex;gap:7px;}
+  .quorum .dot{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-family:var(--mono);font-size:10px;font-weight:700;border:1.5px solid var(--verified);background:var(--verified-bg);color:var(--verified);}
+  .quorum .dot.off{border-color:var(--line-strong);background:var(--surface-2);color:var(--faint);}
+  .quorum .qt{font-size:13px;color:var(--muted);} .quorum .qt b{color:var(--ink);}
+
+  /* lifecycle stepper */
+  .steps{display:flex;flex-direction:column;gap:8px;}
+  .step{display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px 15px;box-shadow:var(--shadow);}
+  .step .sn{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);}
+  .step .sbody .st{font-size:14px;font-weight:650;color:var(--ink);}
+  .step .sbody .sd{font-size:12px;color:var(--muted);margin-top:1px;}
+  .step .sbody .sd b{color:var(--ink);}
+  .badge{font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;font-weight:700;padding:4px 9px;border-radius:6px;white-space:nowrap;}
+  .badge.gate{background:var(--flag-bg);color:var(--flag);}
+  .badge.witness{background:var(--verified-bg);color:var(--verified);}
+  .ngo-note{font-size:12.5px;color:var(--muted);margin-top:10px;padding-left:13px;border-left:2px solid var(--accent);}
+  .ngo-note b{color:var(--ink);}
+
+  /* last-mile flow */
+  .lm{display:flex;flex-direction:column;gap:9px;}
+  pre{margin:0;background:var(--code-bg);color:var(--code-ink);font-family:var(--mono);font-size:12px;line-height:1.55;padding:15px 17px;border-radius:10px;overflow-x:auto;box-shadow:var(--shadow);}
+  pre .c{color:var(--code-faint);} pre .k{color:var(--code-key);} pre .s{color:var(--code-str);}
+
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .mini{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;box-shadow:var(--shadow);}
+  .mini h3{font-family:var(--sans);font-size:13px;margin:0 0 7px;letter-spacing:-.01em;}
+  .mini ul{margin:0;padding-left:15px;} .mini li{font-size:12.5px;color:var(--muted);margin-bottom:5px;} .mini li:last-child{margin:0;} .mini li b{color:var(--ink);}
+
+  footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);color:var(--faint);font-size:11.5px;}
+  footer .src{font-family:var(--mono);font-size:10px;line-height:1.7;}
+  a{color:var(--accent-2);}
+  a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+  @media (max-width:640px){
+    .claim,.two{grid-template-columns:1fr;}
+    .step{grid-template-columns:26px 1fr;} .step .badge{grid-column:2;justify-self:start;margin-top:2px;}
+  }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <span class="eyebrow">Government-to-Person Disbursement · System One-Pager</span>
+    <h1>Every public dollar, signed by an independent institution — and impossible for any one of them to forge.</h1>
+    <p class="lede">A permissioned blockchain records the full custody of a government payment, from treasury to citizen. The money never leaves the banking rails; the chain holds only tamper-proof <em>proof</em>. No single institution — not even the one running the program — can rewrite the record.</p>
+    <div class="chips">
+      <span class="chip"><b>Non-custodial</b> · records, not money</span>
+      <span class="chip"><b>4 institutions</b> · Besu QBFT</span>
+      <span class="chip"><b>Chain off</b> the critical path</span>
+    </div>
+  </header>
+
+  <section>
+    <span class="kicker">What it does — and doesn’t — prove</span>
+    <h2>An honest claim</h2>
+    <div class="claim" style="margin-top:14px">
+      <div class="c yes">
+        <div class="h">✓ It proves</div>
+        <ul>
+          <li>Every step is <b>attributable</b> to a specific institution’s key.</li>
+          <li>No record can be <b>altered or erased</b> without 3 of 4 independent bodies colluding.</li>
+          <li>Each bank’s <b>settlement of each payout</b> (by UTR) is signed and non-repudiable.</li>
+        </ul>
+      </div>
+      <div class="c no">
+        <div class="h">✕ It does not</div>
+        <ul>
+          <li>Catch <b>ghost or duplicate citizens</b> — that is beaten upstream by national ID / biometrics.</li>
+          <li>Prove cash reached a hand — only that funds were <b>settled to the account</b>.</li>
+          <li>Move money — <b>banks do that</b>, on existing rails.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <span class="kicker">Architecture · one picture</span>
+    <h2>Two lanes: money on rails, proof on the chain</h2>
+    <div class="fig dg" style="margin-top:14px">
+      <svg viewBox="0 0 720 322" role="img" aria-label="The permissioned chain (top lane) is four validator nodes — Finance, Central Bank, Ministry, NGO — sharing one thin G2PLedger contract. Below a dashed 'off the critical path' divider, the money lane shows funds flowing on existing bank rails from Central Bank to Ministry to Banks to Citizens.">
+        <text class="t-lane" x="16" y="16">Records · permissioned Besu chain · 3-of-4 QBFT (tamper-proof witness)</text>
+        <!-- consortium line -->
+        <line class="conn" x1="105" y1="52" x2="615" y2="52"/>
+        <!-- institution nodes -->
+        <g>
+          <rect class="box" x="30"  y="30" width="150" height="46" rx="9"/>
+          <text class="t-node" x="105" y="52" text-anchor="middle">Finance</text>
+          <text class="t-sub"  x="105" y="66" text-anchor="middle">authorizes budget</text>
+          <rect class="box" x="200" y="30" width="150" height="46" rx="9"/>
+          <text class="t-node" x="275" y="52" text-anchor="middle">Central Bank</text>
+          <text class="t-sub"  x="275" y="66" text-anchor="middle">releases funds</text>
+          <rect class="box" x="370" y="30" width="150" height="46" rx="9"/>
+          <text class="t-node" x="445" y="52" text-anchor="middle">Ministry</text>
+          <text class="t-sub"  x="445" y="66" text-anchor="middle">runs the program</text>
+          <rect class="box" x="540" y="30" width="150" height="46" rx="9"/>
+          <text class="t-node" x="615" y="52" text-anchor="middle">NGO</text>
+          <text class="t-sub"  x="615" y="66" text-anchor="middle">independent auditor</text>
+        </g>
+        <!-- drops to ledger -->
+        <line class="conn" x1="105" y1="76" x2="105" y2="96"/>
+        <line class="conn" x1="275" y1="76" x2="275" y2="96"/>
+        <line class="conn" x1="445" y1="76" x2="445" y2="96"/>
+        <line class="conn" x1="615" y1="76" x2="615" y2="96"/>
+        <!-- ledger bar -->
+        <rect class="ledger" x="30" y="96" width="660" height="36" rx="9"/>
+        <text class="t-ledger" x="360" y="119" text-anchor="middle">G2PLedger · one thin smart contract — hashes &amp; signatures only, never PII or money</text>
+        <!-- divider -->
+        <line class="divider" x1="16" y1="172" x2="704" y2="172"/>
+        <text class="t-div" x="360" y="166" text-anchor="middle">off the critical path — if the chain lags or dies, money still flows</text>
+        <!-- money lane -->
+        <text class="t-lane" x="16" y="204">Money · existing bank / RTGS / ACH rails — the platform never holds a cent</text>
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0,0 L10,5 L0,10 z" fill="var(--verified)"/>
+          </marker>
+        </defs>
+        <g>
+          <rect class="rail" x="30"  y="222" width="140" height="46" rx="9"/>
+          <text class="t-node" x="100" y="249" text-anchor="middle">Central Bank</text>
+          <rect class="rail" x="210" y="222" width="140" height="46" rx="9"/>
+          <text class="t-node" x="280" y="249" text-anchor="middle">Ministry</text>
+          <rect class="rail" x="390" y="222" width="140" height="46" rx="9"/>
+          <text class="t-node" x="460" y="249" text-anchor="middle">Banks / PSPs</text>
+          <rect class="rail" x="570" y="222" width="120" height="46" rx="9"/>
+          <text class="t-node" x="630" y="249" text-anchor="middle">Citizens</text>
+          <line class="flow" x1="170" y1="245" x2="206" y2="245" marker-end="url(#ar)"/>
+          <line class="flow" x1="350" y1="245" x2="386" y2="245" marker-end="url(#ar)"/>
+          <line class="flow" x1="530" y1="245" x2="566" y2="245" marker-end="url(#ar)"/>
+        </g>
+        <text class="t-div" x="360" y="300" text-anchor="middle">each money leg is mirrored by a signed attestation on the chain above</text>
+      </svg>
+      <p class="figcap">The two layers are deliberately separate: a payment succeeds on a normal bank settlement; the chain is a witness that records who signed what.</p>
+    </div>
+  </section>
+
+  <section>
+    <span class="kicker">Why no one can cheat</span>
+    <h2>Trust comes from 3-of-4, not from a promise</h2>
+    <p class="sub" style="margin-bottom:14px">Each institution runs one validator and signs with its own key. A block — a record — only becomes final when <strong>3 of the 4 independent institutions</strong> cryptographically agree. The Ministry cannot insert a fake payment or delete a real one; it is one vote of four.</p>
+    <div class="quorum">
+      <div class="dots">
+        <span class="dot">FIN</span><span class="dot">CB</span><span class="dot">MIN</span><span class="dot off">NGO</span>
+      </div>
+      <span class="qt"><b>3 of 4 agree → record is final &amp; irreversible.</b> The network survives 1 malicious or offline institution (QBFT: N ≥ 3f+1). Onboarding a 5th institution is itself an on-chain vote.</span>
+    </div>
+  </section>
+
+  <section>
+    <span class="kicker">The lifecycle · one batch, start to finish</span>
+    <h2>Every step signed — the NGO watches all of them</h2>
+    <div class="steps" style="margin-top:14px">
+      <div class="step"><span class="sn">1</span><div class="sbody"><div class="st">Verified</div><div class="sd">Ministry checks the roster · <b>NGO countersigns</b></div></div><span class="badge witness">witness</span></div>
+      <div class="step"><span class="sn">2</span><div class="sbody"><div class="st">Fund release · Central Bank → Ministry</div><div class="sd">CB + Finance sign · <b>NGO required</b> (checks CB statement)</div></div><span class="badge gate">blocking gate</span></div>
+      <div class="step"><span class="sn">3</span><div class="sbody"><div class="st">Authorized</div><div class="sd">Ministry authorizer — must differ from creator · <b>NGO countersigns</b></div></div><span class="badge witness">witness</span></div>
+      <div class="step"><span class="sn">4</span><div class="sbody"><div class="st">Sent to banks</div><div class="sd">Ministry signs the exact instruction <code>docHash</code> · <b>NGO re-hashes</b></div></div><span class="badge witness">witness</span></div>
+      <div class="step"><span class="sn">5</span><div class="sbody"><div class="st">Paid</div><div class="sd">each bank signs its per-citizen outcome + UTR · <b>NGO cross-checks</b></div></div><span class="badge witness">witness</span></div>
+      <div class="step"><span class="sn">6</span><div class="sbody"><div class="st">Reconciled</div><div class="sd">control totals close to the centavo · <b>NGO required</b></div></div><span class="badge gate">blocking gate</span></div>
+    </div>
+    <p class="ngo-note">The NGO signs at <b>every</b> step, but only <b>blocks</b> at the two high-stakes, low-volume gates — so an offline auditor can never freeze a nation’s payments. Everywhere else its signature is a witness, and it may sign a <b>dispute</b> instead of an approval: an NGO objection is written on-chain, permanently, and can never be buried.</p>
+  </section>
+
+  <section>
+    <span class="kicker">The last mile · how “paid” is proven</span>
+    <h2>The bank’s signed receipt is the proof</h2>
+    <p class="sub" style="margin-bottom:14px">On send, each of the 10,000 payouts gets a unique <code>endToEndId</code>. The paying bank disburses, then returns a <strong>cryptographically signed</strong> callback carrying the settlement reference (<strong>UTR</strong>). The system auto-matches it. Only signed, matched receipts count as paid — everything else is treated as unpaid and flagged.</p>
+<pre>Ministry → 10,000 items, each with <span class="k">endToEndId</span>        <span class="c">// docHash anchored on-chain</span>
+      ↓
+Bank pays, <span class="k">signs</span> &amp; POSTs { endToEndId, <span class="k">utr</span>, status:<span class="s">"PAID"</span> }   <span class="c">// signature = the attestation</span>
+      ↓  auto-match endToEndId + amount + account
+   ├─ matched + signed   →  <span class="s">PAID</span>    (UTR recorded · outcome in Merkle root)
+   └─ missing / mismatch →  <span class="s">NOT PAID</span> · FLAGGED for investigation</pre>
+    <div class="two" style="margin-top:14px">
+      <div class="mini"><h3>Non-negotiable</h3><ul><li>The callback is <b>signed with the bank’s key</b> — a plain POST is forgeable, and that is exactly where fraud would re-enter.</li><li>The signature makes the bank <b>unable to later deny</b> it paid.</li></ul></div>
+      <div class="mini"><h3>Scale, kept cheap</h3><ul><li>Outcomes are batched into a <b>Merkle root</b> anchored on-chain — not 10,000 writes.</li><li>Any single citizen’s payment is provable with a small <b>inclusion proof</b>.</li></ul></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="kicker">On the chain · deliberately almost nothing</span>
+    <h2>Proofs, never data</h2>
+    <p class="sub">Per record, on-chain: <code>{ batchId, itemId, status, docHash, HMAC(citizenId), signer }</code> plus batch Merkle roots. <strong>Never</strong> names, IDs in the clear, account numbers, or amounts — those stay in an encrypted, erasable database (delete the salt to erase). Each night the ledger’s root is anchored to <strong>Bitcoin</strong>, so not even the four institutions together can back-date history.</p>
+  </section>
+
+  <footer>
+    <p>Illustrative system documentation · companion to the Architecture Brief. Modeled on a national scholarship / medical-benefit disbursement. Money-at-risk controls (funding model, reconciliation states, identity dedup) are resolved with the client before build.</p>
+    <p class="src">Stack — Hyperledger Besu (QBFT, 4 validators) · Solidity smart contract · Postgres spine + relayer · signed bank callbacks (UTR) · Blockscout · OpenTimestamps → Bitcoin · Docker.</p>
+  </footer>
+
+</div>
+</body>
+</html>

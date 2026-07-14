@@ -221,7 +221,7 @@
       <div class="layer off"><div class="role"><span class="rn">tier 2</span><span class="rt">Truth</span></div><div class="body">One <b>append-only Postgres</b>. Payment lines + an <code>outbox</code> row written in the <b>same transaction</b>. This commit — nothing else — is what makes a payment real.</div></div>
       <div class="layer"><div class="role"><span class="rn">tier 3</span><span class="rt">Control</span></div><div class="body"><b>Maker → checker → authorizer</b>, plus inter-institutional co-signatures, enforced in the app workflow. Money is not instructed until the required signatures exist. This is the real gate.</div></div>
       <div class="flowmark">▼ async · off the critical path ▼</div>
-      <div class="layer hero"><div class="role"><span class="rn">tier 4</span><span class="rt">Witness</span></div><div class="body">A <b>managed permissioned chain</b> (Besu/QBFT via Kaleido or SettleMint). Four validators, one each held by <b>Finance Ministry · Central Bank · a third body · an independent NGO</b>. A relayer drains the outbox. One thin contract records signed status transitions.</div></div>
+      <div class="layer hero"><div class="role"><span class="rn">tier 4</span><span class="rt">Witness</span></div><div class="body">A <b>managed permissioned chain</b> (Besu/QBFT via Kaleido or SettleMint). Four validators, one each held by <b>Finance · Central Bank · the executing Ministry · an independent Audit Court</b>. A relayer drains the outbox. One thin contract records signed status transitions.</div></div>
       <div class="layer hero"><div class="role"><span class="rn">tier 5</span><span class="rt">Anchor</span></div><div class="body">Nightly <b>Merkle root → Bitcoin</b> (OpenTimestamps). This is what makes “even the consortium cannot rewrite history” <em>true</em> — forging it would mean rewriting Bitcoin.</div></div>
       <div class="layer off"><div class="role"><span class="rn">tier 6</span><span class="rt">Reporting</span></div><div class="body">Dashboards read <b>Postgres projections, never the chain</b> — so reporting is always fast and always up, whatever the chain is doing.</div></div>
     </div>
@@ -238,19 +238,19 @@
       </div>
       <div class="drow"><div class="dim">Who runs the nodes</div><div class="cells">
         <div class="cell old">One entity — the executing agency holds operator, verifier <em>and</em> authorizer, and every validator runs under <b>one admin</b>.</div>
-        <div class="cell new">Four <b>distinct legal custodians</b> — Finance Ministry, Central Bank, a third body, and an independent NGO — one node each.</div>
+        <div class="cell new">Four <b>distinct legal custodians</b> — Finance, Central Bank, the executing Ministry, and an independent Audit Court — one node each.</div>
       </div></div>
       <div class="drow"><div class="dim">Where trust comes from</div><div class="cells">
         <div class="cell old">You still have to <b>trust the operator’s copy</b>; the nightly public anchor is the <em>only</em> external check.</div>
         <div class="cell new">No single operator sits in the trust base — trust rests on <b>independent consensus</b> plus a mandatory outside signer.</div>
       </div></div>
-      <div class="drow"><div class="dim">The independent auditor / NGO</div><div class="cells">
-        <div class="cell old">A <b>read-only observer</b>. It can verify the trail, but it gates nothing and signs nothing.</div>
-        <div class="cell new">A <b>validator and mandatory co-signer</b> — nothing advances without it, and it signs against external bank evidence.</div>
+      <div class="drow"><div class="dim">The independent seat</div><div class="cells">
+        <div class="cell old">A <b>read-only observer</b>, if present at all. It gates nothing and signs nothing.</div>
+        <div class="cell new">An <b>audit-court validator</b> — can’t be bypassed for a rewrite, and it signs the <b>final certification</b>. NGO observers may dispute any step.</div>
       </div></div>
       <div class="drow"><div class="dim">What a signature proves</div><div class="cells">
         <div class="cell old">That the operator’s <b>own records</b> are internally consistent and unaltered.</div>
-        <div class="cell new">That <b>separate institutions each attested</b>, against bank-signed <code>camt.053</code> settlement evidence.</div>
+        <div class="cell new">That <b>separate institutions each attested</b>, against bank-signed <code>UTR</code> / <code>camt.053</code> settlement evidence.</div>
       </div></div>
       <div class="drow"><div class="dim">The threat it actually stops</div><div class="cells">
         <div class="cell old"><span class="x">✕</span>Accidental drift and outside tampering — <b>not</b> the operator itself.</div>
@@ -271,13 +271,13 @@
       <div class="card gate">
         <span class="tag">Hard gate</span>
         <h3>Inter-institutional transfers</h3>
-        <p>e.g. Central Bank → Ministry. A <b>handful</b>, high value. Require multi-signature (CB + Ministry + NGO), collected in the workflow <b>before</b> the instruction is released.</p>
-        <p>A slow NGO here delays one big transfer — tolerable.</p>
+        <p>e.g. Central Bank → Ministry. A <b>handful</b>, high value. Require multi-signature (<b>Central Bank + Finance + Ministry</b>), collected in the workflow <b>before</b> the instruction is released.</p>
+        <p>Three independent state bodies — no outside party needed to move the money.</p>
       </div>
       <div class="card witness">
         <span class="tag">Witness + flag</span>
         <h3>Mass citizen payouts</h3>
-        <p>e.g. Ministry → banks → 10,000 people. Far too many to gate on a live signature. Banks sign outcomes, citizens confirm receipt, the NGO audits the aggregate <b>after</b> the fact.</p>
+        <p>e.g. Ministry → banks → 10,000 people. Far too many to gate on a live signature. Each bank signs its outcome (with a UTR); the <b>audit court certifies the reconciliation</b> after the fact.</p>
         <p>A missing signature <b>flags for investigation</b> — it never freezes benefits.</p>
       </div>
     </div>
@@ -307,11 +307,11 @@
   <section>
     <span class="kicker">The last-mile problem · what makes an attestation real</span>
     <h2>Anchor bank-signed proof, not “we paid”</h2>
-    <p class="sub">A hash proves a record is <em>unaltered</em> — not that money reached a person. So the NGO’s signature is only worth what it can independently see. Anchor <strong>bank-generated evidence</strong>, not the ministry’s own claim:</p>
+    <p class="sub">A hash proves a record is <em>unaltered</em> — not that money reached a person. So the certifier’s signature is only worth what it can independently see. Anchor <strong>bank-generated evidence</strong>, not the ministry’s own claim:</p>
     <ul class="facts">
       <li><span class="m">▹</span><span><b>ISO 20022 <code>camt.053</code> / <code>camt.054</code></b> — the receiving bank’s own statement that funds were <em>booked</em> to the beneficiary’s account, with machine-readable outcome codes (<code>BOOK</code>, <code>Settlement Failed</code>, <code>RDFI&nbsp;NonSettlement</code>). This distinguishes a real payout from a failed one.</span></li>
       <li><span class="m">▹</span><span><b>Beneficiary confirmation</b> (SMS / USSD, or biometric cash-out for the unbanked) — the independent last-mile check that account-credit actually became cash-in-hand.</span></li>
-      <li><span class="m">▹</span><span>The NGO signs <b>against these external artifacts</b>. Signing against the ministry’s internal record instead is a rubber stamp — it just co-signs the same story.</span></li>
+      <li><span class="m">▹</span><span>The audit court certifies <b>against these external artifacts</b>. Certifying against the ministry’s internal record instead is a rubber stamp — it just co-signs the same story.</span></li>
     </ul>
   </section>
 
@@ -338,7 +338,7 @@
       <div class="branch yes">
         <div class="bh">✓ Yes — real custody</div>
         <h3>Build the consortium chain above</h3>
-        <p>Central Bank + audit court/NGO each hold a key and run a managed node. You get a system genuinely stronger than FundsChain or WFP. Proceed exactly as specified.</p>
+        <p>Central Bank + audit court each hold a key and run a managed node. You get a system genuinely stronger than FundsChain or WFP. Proceed exactly as specified.</p>
       </div>
       <div class="branch no">
         <div class="bh">✕ No — one operator</div>

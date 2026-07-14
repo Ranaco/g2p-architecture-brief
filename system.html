@@ -162,7 +162,7 @@
     <span class="kicker">Architecture · one picture</span>
     <h2>Two lanes: money on rails, proof on the chain</h2>
     <div class="fig dg" style="margin-top:14px">
-      <svg viewBox="0 0 720 322" role="img" aria-label="The permissioned chain (top lane) is four validator nodes — Finance, Central Bank, Ministry, NGO — sharing one thin G2PLedger contract. Below a dashed 'off the critical path' divider, the money lane shows funds flowing on existing bank rails from Central Bank to Ministry to Banks to Citizens.">
+      <svg viewBox="0 0 720 322" role="img" aria-label="The permissioned chain (top lane) is four validator nodes — Finance, Central Bank, Ministry, Audit Court — sharing one thin G2PLedger contract. Below a dashed 'off the critical path' divider, the money lane shows funds flowing on existing bank rails from Central Bank to Ministry to Banks to Citizens.">
         <text class="t-lane" x="16" y="16">Records · permissioned Besu chain · 3-of-4 QBFT (tamper-proof witness)</text>
         <!-- consortium line -->
         <line class="conn" x1="105" y1="52" x2="615" y2="52"/>
@@ -178,8 +178,8 @@
           <text class="t-node" x="445" y="52" text-anchor="middle">Ministry</text>
           <text class="t-sub"  x="445" y="66" text-anchor="middle">runs the program</text>
           <rect class="box" x="540" y="30" width="150" height="46" rx="9"/>
-          <text class="t-node" x="615" y="52" text-anchor="middle">NGO</text>
-          <text class="t-sub"  x="615" y="66" text-anchor="middle">independent auditor</text>
+          <text class="t-node" x="615" y="52" text-anchor="middle">Audit Court</text>
+          <text class="t-sub"  x="615" y="66" text-anchor="middle">independent, non-executive</text>
         </g>
         <!-- drops to ledger -->
         <line class="conn" x1="105" y1="76" x2="105" y2="96"/>
@@ -224,7 +224,7 @@
     <p class="sub" style="margin-bottom:14px">Each institution runs one validator and signs with its own key. A block — a record — only becomes final when <strong>3 of the 4 independent institutions</strong> cryptographically agree. The Ministry cannot insert a fake payment or delete a real one; it is one vote of four.</p>
     <div class="quorum">
       <div class="dots">
-        <span class="dot">FIN</span><span class="dot">CB</span><span class="dot">MIN</span><span class="dot off">NGO</span>
+        <span class="dot">FIN</span><span class="dot">CB</span><span class="dot">MIN</span><span class="dot off">AUD</span>
       </div>
       <span class="qt"><b>3 of 4 agree → record is final &amp; irreversible.</b> The network survives 1 malicious or offline institution (QBFT: N ≥ 3f+1). Onboarding a 5th institution is itself an on-chain vote.</span>
     </div>
@@ -232,16 +232,16 @@
 
   <section>
     <span class="kicker">The lifecycle · one batch, start to finish</span>
-    <h2>Every step signed — the NGO watches all of them</h2>
+    <h2>Signed by whoever owns each step — one independent certification</h2>
     <div class="steps" style="margin-top:14px">
-      <div class="step"><span class="sn">1</span><div class="sbody"><div class="st">Verified</div><div class="sd">Ministry checks the roster · <b>NGO countersigns</b></div></div><span class="badge witness">witness</span></div>
-      <div class="step"><span class="sn">2</span><div class="sbody"><div class="st">Fund release · Central Bank → Ministry</div><div class="sd">CB + Finance sign · <b>NGO required</b> (checks CB statement)</div></div><span class="badge gate">blocking gate</span></div>
-      <div class="step"><span class="sn">3</span><div class="sbody"><div class="st">Authorized</div><div class="sd">Ministry authorizer — must differ from creator · <b>NGO countersigns</b></div></div><span class="badge witness">witness</span></div>
-      <div class="step"><span class="sn">4</span><div class="sbody"><div class="st">Sent to banks</div><div class="sd">Ministry signs the exact instruction <code>docHash</code> · <b>NGO re-hashes</b></div></div><span class="badge witness">witness</span></div>
-      <div class="step"><span class="sn">5</span><div class="sbody"><div class="st">Paid</div><div class="sd">each bank signs its per-citizen outcome + UTR · <b>NGO cross-checks</b></div></div><span class="badge witness">witness</span></div>
-      <div class="step"><span class="sn">6</span><div class="sbody"><div class="st">Reconciled</div><div class="sd">control totals close to the centavo · <b>NGO required</b></div></div><span class="badge gate">blocking gate</span></div>
+      <div class="step"><span class="sn">1</span><div class="sbody"><div class="st">Verified</div><div class="sd">Ministry checks the roster</div></div><span class="badge witness">witness</span></div>
+      <div class="step"><span class="sn">2</span><div class="sbody"><div class="st">Fund release · Central Bank → Ministry</div><div class="sd">Central Bank + Finance + Ministry co-sign — three independent state bodies</div></div><span class="badge gate">blocking gate</span></div>
+      <div class="step"><span class="sn">3</span><div class="sbody"><div class="st">Authorized</div><div class="sd">Ministry authorizer — must differ from creator</div></div><span class="badge witness">witness</span></div>
+      <div class="step"><span class="sn">4</span><div class="sbody"><div class="st">Sent to banks</div><div class="sd">Ministry signs the exact instruction <code>docHash</code></div></div><span class="badge witness">witness</span></div>
+      <div class="step"><span class="sn">5</span><div class="sbody"><div class="st">Paid</div><div class="sd">each bank signs its per-citizen outcome + UTR</div></div><span class="badge witness">witness</span></div>
+      <div class="step"><span class="sn">6</span><div class="sbody"><div class="st">Reconciled</div><div class="sd">control totals close to the centavo · <b>Audit Court required</b></div></div><span class="badge gate">blocking gate</span></div>
     </div>
-    <p class="ngo-note">The NGO signs at <b>every</b> step, but only <b>blocks</b> at the two high-stakes, low-volume gates — so an offline auditor can never freeze a nation’s payments. Everywhere else its signature is a witness, and it may sign a <b>dispute</b> instead of an approval: an NGO objection is written on-chain, permanently, and can never be buried.</p>
+    <p class="ngo-note">The independent seat is the <b>national audit court</b> — constitutionally independent of the executive, so easy for a government to accept. It <b>always runs a validator</b> (so no record can be rewritten without it), but it <b>actively signs only the final reconciliation</b> — the one moment the system certifies the money reached the right people. <b>Civil-society / NGO observers</b> get read-only access and may file an on-chain <b>dispute</b> at any step — permanent, un-buriable — but carry no signing burden and cannot freeze payments.</p>
   </section>
 
   <section>

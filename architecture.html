@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>G2P Fund-Traceability — System Architecture</title>
+<style>html{-webkit-text-size-adjust:100%}img{max-width:100%}</style>
+<style>
+  :root{
+    --paper:#f5f6f9;--surface:#fff;--surface-2:#eef0f6;--line:#dde1ec;--line-strong:#c6ccdd;
+    --ink:#161b2e;--muted:#525a72;--faint:#8189a1;--accent:#2f3d78;--accent-2:#4356a6;
+    --verified:#1f7a5a;--verified-bg:#e4f1ea;--flag:#8f5b12;--flag-bg:#f6ecd8;--danger:#a2453b;--danger-bg:#f4e2df;
+    --code-bg:#141a30;--code-ink:#d7deef;--code-faint:#7f8bb0;
+    --shadow:0 1px 2px rgba(20,27,46,.05),0 10px 30px -14px rgba(20,27,46,.18);
+    --serif:"Iowan Old Style","Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono","Menlo","Consolas",monospace;
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --paper:#0c0f1a;--surface:#131829;--surface-2:#1a2036;--line:#262d45;--line-strong:#374064;
+    --ink:#e9ecf6;--muted:#a3abc4;--faint:#6d769a;--accent:#8b9ae0;--accent-2:#a7b3ec;
+    --verified:#4fc79c;--verified-bg:#12271f;--flag:#dca94b;--flag-bg:#2c2411;--danger:#e0857b;--danger-bg:#2e1a17;
+    --code-bg:#0a0f1e;--code-ink:#cdd6ee;--code-faint:#6c78a0;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 34px -16px rgba(0,0,0,.7);
+  }}
+  :root[data-theme="light"]{--paper:#f5f6f9;--surface:#fff;--surface-2:#eef0f6;--line:#dde1ec;--line-strong:#c6ccdd;--ink:#161b2e;--muted:#525a72;--faint:#8189a1;--accent:#2f3d78;--accent-2:#4356a6;--verified:#1f7a5a;--verified-bg:#e4f1ea;--flag:#8f5b12;--flag-bg:#f6ecd8;--danger:#a2453b;--danger-bg:#f4e2df;--code-bg:#141a30;--code-ink:#d7deef;--code-faint:#7f8bb0;--shadow:0 1px 2px rgba(20,27,46,.05),0 10px 30px -14px rgba(20,27,46,.18);}
+  :root[data-theme="dark"]{--paper:#0c0f1a;--surface:#131829;--surface-2:#1a2036;--line:#262d45;--line-strong:#374064;--ink:#e9ecf6;--muted:#a3abc4;--faint:#6d769a;--accent:#8b9ae0;--accent-2:#a7b3ec;--verified:#4fc79c;--verified-bg:#12271f;--flag:#dca94b;--flag-bg:#2c2411;--danger:#e0857b;--danger-bg:#2e1a17;--code-bg:#0a0f1e;--code-ink:#cdd6ee;--code-faint:#6c78a0;--shadow:0 1px 2px rgba(0,0,0,.4),0 12px 34px -16px rgba(0,0,0,.7);}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.58;-webkit-font-smoothing:antialiased;font-size:15.5px;}
+  .wrap{max-width:840px;margin:0 auto;padding:56px 24px 80px;}
+  .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:600;}
+  h1{font-family:var(--serif);font-weight:700;font-size:clamp(28px,4.8vw,40px);line-height:1.07;letter-spacing:-.01em;margin:14px 0 12px;text-wrap:balance;}
+  .lede{font-size:clamp(15px,2vw,17.5px);color:var(--muted);max-width:62ch;margin:0;}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:18px;}
+  .chip{font-family:var(--mono);font-size:10.5px;padding:4px 10px;border-radius:999px;border:1px solid var(--line-strong);color:var(--muted);background:var(--surface);}
+  .chip b{color:var(--ink);font-weight:600;}
+  section{padding-top:44px;}
+  h2{font-family:var(--serif);font-weight:700;font-size:clamp(19px,2.9vw,24px);letter-spacing:-.01em;margin:0 0 4px;text-wrap:balance;}
+  .kicker{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:600;display:block;margin-bottom:12px;}
+  p{margin:0 0 12px;} p:last-child{margin-bottom:0;} .sub{color:var(--muted);max-width:66ch;}
+  strong{color:var(--ink);font-weight:650;} em{color:var(--ink);font-style:italic;}
+  code{font-family:var(--mono);font-size:.82em;background:var(--surface-2);padding:1px 5px;border-radius:5px;border:1px solid var(--line);}
+  .fig{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:16px 12px 8px;overflow-x:auto;}
+  .fig svg{display:block;width:100%;min-width:600px;height:auto;}
+  .dg .box{fill:var(--surface);stroke:var(--line-strong);stroke-width:1.4;}
+  .dg .ledger{fill:var(--accent);}
+  .dg .rail{fill:var(--verified-bg);stroke:var(--verified);stroke-width:1.4;}
+  .dg .spine{fill:var(--surface-2);stroke:var(--line-strong);stroke-width:1.4;}
+  .dg .anchor{fill:var(--flag-bg);stroke:var(--flag);stroke-width:1.4;}
+  .dg .conn{stroke:var(--line-strong);stroke-width:1.4;fill:none;} .dg .flow{stroke:var(--verified);stroke-width:1.8;fill:none;} .dg .divider{stroke:var(--faint);stroke-width:1.2;stroke-dasharray:5 5;}
+  .dg text{font-family:var(--sans);fill:var(--ink);} .dg .t{font-size:12px;font-weight:650;} .dg .s{font-size:9.5px;fill:var(--muted);} .dg .tl{fill:#fff;font-size:12px;font-weight:700;}
+  .dg .lane{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;fill:var(--faint);font-weight:600;}
+  :root[data-theme="dark"] .dg .tl{fill:#0c0f1a;} @media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .dg .tl{fill:#0c0f1a;}}
+  .table-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);margin-top:14px;}
+  table{border-collapse:collapse;width:100%;min-width:560px;background:var(--surface);font-size:13px;}
+  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top;}
+  thead th{font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--faint);background:var(--surface-2);font-weight:600;}
+  tbody tr:last-child td{border-bottom:none;} td strong{color:var(--ink);}
+  td.ref{color:var(--muted);} td.built b{color:var(--verified);}
+  .slice{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);} .slice:last-child{border:none;}
+  .slice .n{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);flex-shrink:0;width:52px;padding-top:1px;}
+  .slice .d{font-size:13.5px;} .slice .d b{color:var(--ink);} .slice .v{font-family:var(--mono);font-size:10.5px;color:var(--verified);margin-top:2px;}
+  .note{border-radius:10px;padding:14px 17px;font-size:13px;border:1px solid;margin-top:14px;}
+  .note .nl{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;display:block;margin-bottom:5px;}
+  .note.key{background:var(--accent);color:#fff;border-color:var(--accent);}
+  :root[data-theme="dark"] .note.key{background:var(--surface);color:var(--ink);border-color:var(--accent);}
+  @media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .note.key{background:var(--surface);color:var(--ink);border-color:var(--accent);}}
+  .note.key .nl{opacity:.82;} .note.honest{background:var(--surface-2);border-color:var(--line-strong);color:var(--muted);} .note.honest .nl{color:var(--faint);} .note.honest strong{color:var(--ink);}
+  footer{margin-top:52px;padding-top:20px;border-top:1px solid var(--line);color:var(--faint);font-size:11.5px;}
+  footer .src{font-family:var(--mono);font-size:10px;line-height:1.7;}
+  a{color:var(--accent-2);} a:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+  @media(max-width:640px){.slice{flex-direction:column;gap:2px;}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Government-to-Person Disbursement · System Architecture</span>
+    <h1>A built, verifiable anti-corruption ledger — not a diagram.</h1>
+    <p class="lede">A working proof-of-concept where a government payment travels treasury→citizen with every step signed by an independent institution, forgery rejected, and the record impossible for anyone — including the government — to rewrite. Money stays on bank rails; the blockchain holds only the proof.</p>
+    <div class="chips">
+      <span class="chip"><b>Non-custodial</b> · records, not money</span>
+      <span class="chip"><b>4 independent validators</b> · Besu QBFT</span>
+      <span class="chip"><b>Bitcoin-anchored</b></span>
+      <span class="chip"><b>~170 tests</b> · 5 adversarial reviews</span>
+    </div>
+  </header>
+
+  <section>
+    <span class="kicker">The architecture · one picture</span>
+    <h2>Four layers, one direction of flow</h2>
+    <div class="fig dg" style="margin-top:14px">
+      <svg viewBox="0 0 760 400" role="img" aria-label="Money flows on bank rails (top). Below it, an off-chain Postgres spine is the source of truth with a transactional outbox and relayer. The relayer mirrors to a 4-validator Besu chain (Finance, Central Bank, Ministry, Audit Court) which is anchored nightly to Bitcoin. A React UI and Blockscout read the projections and chain.">
+        <text class="lane" x="14" y="14">Money · existing bank / RTGS / ACH rails — platform never holds funds</text>
+        <defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--verified)"/></marker></defs>
+        <g>
+          <rect class="rail" x="24" y="26" width="150" height="40" rx="9"/><text class="t" x="99" y="51" text-anchor="middle">Central Bank</text>
+          <rect class="rail" x="214" y="26" width="150" height="40" rx="9"/><text class="t" x="289" y="51" text-anchor="middle">Ministry</text>
+          <rect class="rail" x="404" y="26" width="150" height="40" rx="9"/><text class="t" x="479" y="51" text-anchor="middle">Banks / PSPs</text>
+          <rect class="rail" x="594" y="26" width="142" height="40" rx="9"/><text class="t" x="665" y="51" text-anchor="middle">Citizens</text>
+          <line class="flow" x1="174" y1="46" x2="210" y2="46" marker-end="url(#ar)"/>
+          <line class="flow" x1="364" y1="46" x2="400" y2="46" marker-end="url(#ar)"/>
+          <line class="flow" x1="554" y1="46" x2="590" y2="46" marker-end="url(#ar)"/>
+        </g>
+        <line class="divider" x1="14" y1="86" x2="746" y2="86"/>
+        <text class="lane" x="14" y="104">Off-chain spine · the source of truth + reliability engine (payments succeed here)</text>
+        <g>
+          <rect class="spine" x="24" y="114" width="168" height="52" rx="9"/><text class="t" x="108" y="136" text-anchor="middle">Postgres</text><text class="s" x="108" y="152" text-anchor="middle">append-only + outbox</text>
+          <rect class="spine" x="212" y="114" width="168" height="52" rx="9"/><text class="t" x="296" y="136" text-anchor="middle">Workflow + Reconcile</text><text class="s" x="296" y="152" text-anchor="middle">lifecycle · item outcomes</text>
+          <rect class="spine" x="400" y="114" width="150" height="52" rx="9"/><text class="t" x="475" y="136" text-anchor="middle">Relayer</text><text class="s" x="475" y="152" text-anchor="middle">idempotent · dead-letter</text>
+          <rect class="spine" x="570" y="114" width="166" height="52" rx="9"/><text class="t" x="653" y="136" text-anchor="middle">Signed-UTR webhooks</text><text class="s" x="653" y="152" text-anchor="middle">banks · ECDSA · replay-safe</text>
+        </g>
+        <text class="lane" x="14" y="196" fill="var(--accent)">▼ async mirror (off the critical path — chain can lag or die; money still flows)</text>
+        <line class="conn" x1="475" y1="166" x2="475" y2="214"/>
+        <text class="lane" x="14" y="228">Chain · the immutable, multi-party witness</text>
+        <g>
+          <rect class="box" x="24" y="238" width="712" height="48" rx="10"/>
+          <text class="t" x="380" y="259" text-anchor="middle">Besu · QBFT · 4 validators (3-of-4 to commit)</text>
+          <text class="s" x="380" y="275" text-anchor="middle">Finance · Central Bank · Ministry · Audit Court   —   G2PLedger contract: lifecycle · SoD · multisig · reconcile · disputes</text>
+        </g>
+        <line class="conn" x1="380" y1="286" x2="380" y2="312"/>
+        <g>
+          <rect class="anchor" x="24" y="322" width="352" height="46" rx="10"/><text class="t" x="200" y="344" text-anchor="middle">Bitcoin anchor (OpenTimestamps)</text><text class="s" x="200" y="359" text-anchor="middle">nightly Merkle root — not even all 4 can back-date</text>
+          <rect class="box" x="392" y="322" width="344" height="46" rx="10"/><text class="t" x="564" y="344" text-anchor="middle">Blockscout explorer · React traceability UI</text><text class="s" x="564" y="359" text-anchor="middle">read projections + click any payment to its tx</text>
+        </g>
+      </svg>
+      <p class="figcap" style="font-size:11.5px;color:var(--faint);margin:8px 4px 0;font-style:italic">A payment succeeds on a local Postgres commit; the chain is a downstream witness. That separation is what lets it scale and stay robust.</p>
+    </div>
+    <div class="note key">
+      <span class="nl">The trust model, in one line</span>
+      <strong>Independent validators</strong> mean no single institution can rewrite a record. The <strong>Bitcoin anchor</strong> means not even all four together can back-date one. Everything on-chain is a hash or salted commitment — never PII, never money.
+    </div>
+  </section>
+
+  <section>
+    <span class="kicker">What's built &amp; verified — not sketched</span>
+    <h2>Five slices, each reviewed and run live</h2>
+    <div style="margin-top:12px">
+      <div class="slice"><span class="n">Chain</span><div class="d"><b>4-validator Besu QBFT + G2PLedger contract</b> — lifecycle state machine, segregation-of-duties, fund-release multisig, audit-court reconcile, on-chain disputes.<div class="v">✓ 21 contract tests · live 4-node consensus</div></div></div>
+      <div class="slice"><span class="n">Spine</span><div class="d"><b>Hexagonal off-chain core</b> — Postgres source of truth, transactional outbox, idempotent relayer.<div class="v">✓ chaos test: kill the chain mid-flow → money completes → outbox backfills → zero lost events</div></div></div>
+      <div class="slice"><span class="n">Last mile</span><div class="d"><b>Signed-UTR bank webhooks + reconciliation</b> — ECDSA non-repudiable, amount validated server-side, per-citizen outcomes.<div class="v">✓ forged callback rejected 401 · cross-bank hijack closed · idempotent + replay-safe</div></div></div>
+      <div class="slice"><span class="n">Visibility</span><div class="d"><b>Read API + traceability UI + Blockscout</b> — the custody-seal timeline, item outcomes, dashboards, click-through to the real on-chain tx.<div class="v">✓ live UI over real data · zero PII in projections</div></div></div>
+      <div class="slice"><span class="n">Anchor</span><div class="d"><b>Bitcoin anchor + CI gate</b> — reproducible ledger digest stamped to the public OpenTimestamps calendars.<div class="v">✓ real anchor submitted · digest independently recomputable · make ci green</div></div></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="kicker">How this differs from the original sketch</span>
+    <h2>Signing was never the gap — consensus custody was</h2>
+    <p class="sub">The reference design had the right thesis (records-not-money, off the critical path, HMAC commitments, Bitcoin anchor) and genuine multi-party <em>signing</em> — the finance ministry independently signed the funds step, banks signed outcomes. We kept all of that. The difference is a precise one:</p>
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th>Dimension</th><th>Reference sketch</th><th>This build</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Signing</strong></td><td class="ref">Independent signers already (Finance signs funds, banks sign outcomes)</td><td class="built">Kept — same multi-party signing</td></tr>
+          <tr><td><strong>Validator custody</strong></td><td class="ref">Conceded its validators sat under one operator ("little edge over a WORM DB"); real distribution deferred to "Phase&nbsp;2"</td><td class="built"><b>Distributed on day one</b> — 4 independent institutions incl. an Audit Court; 3-of-4 to commit</td></tr>
+          <tr><td><strong>Rewrite resistance</strong></td><td class="ref">Signing doesn't stop the node operator from rewriting the ledger</td><td class="built"><b>No operator can rewrite</b> — consensus + Bitcoin anchor</td></tr>
+          <tr><td><strong>Maturity</strong></td><td class="ref">Illustrative sketch — sample data, in-browser toy</td><td class="built"><b>Running, tested system</b> — ~170 tests, live end-to-end</td></tr>
+          <tr><td><strong>Last-mile security</strong></td><td class="ref">"signed callbacks" as a concept</td><td class="built"><b>ECDSA non-repudiation</b>; forgery + cross-bank hijack rejected</td></tr>
+          <tr><td><strong>Reliability</strong></td><td class="ref">"off the critical path" as a principle</td><td class="built"><b>Proven</b> by an automated chaos test</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note key" style="margin-top:14px">
+      <span class="nl">The crux</span>
+      Rewriting a ledger is a <strong>validator (consensus)</strong> power, not a <strong>signer</strong> power — so multiple independent signers on a chain one operator secures is still rewritable by that operator. The reference conceded this; we fixed it by distributing validator custody, and made the whole system real.
+    </div>
+  </section>
+
+  <section>
+    <span class="kicker">Said plainly</span>
+    <h2>Honest limits</h2>
+    <div class="note honest">
+      <span class="nl">This is a proof-of-concept</span>
+      Throwaway dev keys, single-machine Docker, simulated banks. The Bitcoin anchor is real but confirms in hours (calendar-level immediately, upgrades to a block attestation later). The chain proves records are unaltered and attributable — it does not catch ghost/duplicate citizens (beaten upstream by identity/biometrics) and, without citizen confirmation, proves <strong>settlement to an account</strong>, not cash-in-hand. Production needs real independent validator custody, HSM key management, an independent audit, and a signed DPIA.
+    </div>
+  </section>
+
+  <footer>
+    <p>G2P Fund-Traceability POC · companion to the Architecture Brief and System One-Pager. Every claim above is verified against the running system.</p>
+    <p class="src">Stack — Hyperledger Besu (QBFT, 4 validators) · Solidity/Foundry · Node/TS pnpm monorepo (hexagonal) · Postgres + transactional outbox · signed ECDSA UTR webhooks · Blockscout · React/Vite · OpenTimestamps → Bitcoin · Docker · GitHub Actions CI.</p>
+  </footer>
+</div>
+</body>
+</html>

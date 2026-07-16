@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>G2P — Validators &amp; Signing Flow</title>
+<style>html{-webkit-text-size-adjust:100%}img{max-width:100%}</style>
+<style>
+  :root{
+    --paper:#f5f6f9;--surface:#fff;--surface-2:#eef0f6;--line:#dde1ec;--line-strong:#c6ccdd;
+    --ink:#161b2e;--muted:#525a72;--faint:#8189a1;--accent:#2f3d78;--accent-2:#4356a6;
+    --verified:#1f7a5a;--verified-bg:#e4f1ea;--flag:#8f5b12;--flag-bg:#f6ecd8;--danger:#a2453b;--danger-bg:#f4e2df;
+    --shadow:0 1px 2px rgba(20,27,46,.05),0 10px 30px -14px rgba(20,27,46,.18);
+    --serif:"Iowan Old Style","Palatino Linotype","Book Antiqua",Palatino,Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono","Menlo","Consolas",monospace;
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --paper:#0c0f1a;--surface:#131829;--surface-2:#1a2036;--line:#262d45;--line-strong:#374064;
+    --ink:#e9ecf6;--muted:#a3abc4;--faint:#6d769a;--accent:#8b9ae0;--accent-2:#a7b3ec;
+    --verified:#4fc79c;--verified-bg:#12271f;--flag:#dca94b;--flag-bg:#2c2411;--danger:#e0857b;--danger-bg:#2e1a17;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 34px -16px rgba(0,0,0,.7);
+  }}
+  :root[data-theme="light"]{--paper:#f5f6f9;--surface:#fff;--surface-2:#eef0f6;--line:#dde1ec;--line-strong:#c6ccdd;--ink:#161b2e;--muted:#525a72;--faint:#8189a1;--accent:#2f3d78;--accent-2:#4356a6;--verified:#1f7a5a;--verified-bg:#e4f1ea;--flag:#8f5b12;--flag-bg:#f6ecd8;--danger:#a2453b;--danger-bg:#f4e2df;--shadow:0 1px 2px rgba(20,27,46,.05),0 10px 30px -14px rgba(20,27,46,.18);}
+  :root[data-theme="dark"]{--paper:#0c0f1a;--surface:#131829;--surface-2:#1a2036;--line:#262d45;--line-strong:#374064;--ink:#e9ecf6;--muted:#a3abc4;--faint:#6d769a;--accent:#8b9ae0;--accent-2:#a7b3ec;--verified:#4fc79c;--verified-bg:#12271f;--flag:#dca94b;--flag-bg:#2c2411;--danger:#e0857b;--danger-bg:#2e1a17;--shadow:0 1px 2px rgba(0,0,0,.4),0 12px 34px -16px rgba(0,0,0,.7);}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.55;-webkit-font-smoothing:antialiased;font-size:15.5px;}
+  .wrap{max-width:860px;margin:0 auto;padding:52px 24px 80px;}
+  .eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:600;}
+  h1{font-family:var(--serif);font-weight:700;font-size:clamp(27px,4.6vw,38px);line-height:1.07;letter-spacing:-.01em;margin:14px 0 12px;text-wrap:balance;}
+  .lede{font-size:clamp(15px,2vw,17px);color:var(--muted);max-width:64ch;margin:0;}
+  section{padding-top:42px;}
+  h2{font-family:var(--serif);font-weight:700;font-size:clamp(19px,2.9vw,24px);letter-spacing:-.01em;margin:0 0 4px;}
+  .kicker{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:600;display:block;margin-bottom:12px;}
+  p{margin:0 0 12px;} .sub{color:var(--muted);max-width:66ch;} strong{color:var(--ink);font-weight:650;} em{font-style:italic;color:var(--ink);}
+  code{font-family:var(--mono);font-size:.82em;background:var(--surface-2);padding:1px 5px;border-radius:5px;border:1px solid var(--line);}
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px;}
+  .card{border-radius:11px;padding:15px 17px;border:1px solid;box-shadow:var(--shadow);}
+  .card .h{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;font-weight:700;margin-bottom:7px;}
+  .card.val{background:var(--surface);border-color:var(--accent);} .card.val .h{color:var(--accent);}
+  .card.sig{background:var(--surface);border-color:var(--verified);} .card.sig .h{color:var(--verified);}
+  .card p{font-size:13px;color:var(--muted);margin:0;} .card p b{color:var(--ink);}
+  .fig{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:14px 10px 8px;overflow-x:auto;margin-top:14px;}
+  .fig svg{display:block;width:100%;min-width:520px;height:auto;}
+  .dg .node{fill:var(--surface);stroke:var(--accent);stroke-width:1.6;}
+  .dg .ledger{fill:var(--accent);stroke:none;}
+  .dg .spoke{stroke:var(--accent);stroke-width:1.5;stroke-dasharray:4 4;opacity:.6;}
+  .dg text{font-family:var(--sans);fill:var(--ink);} .dg .t{font-size:12.5px;font-weight:700;} .dg .s{font-size:9.5px;fill:var(--muted);} .dg .role{font-family:var(--mono);font-size:8.5px;fill:var(--faint);text-transform:uppercase;letter-spacing:.04em;}
+  .dg .tl{fill:#fff;font-size:12px;font-weight:700;} .dg .tls{fill:#fff;opacity:.85;font-size:9px;}
+  :root[data-theme="dark"] .dg .tl,:root[data-theme="dark"] .dg .tls{fill:#0c0f1a;} @media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .dg .tl,:root:not([data-theme="light"]) .dg .tls{fill:#0c0f1a;}}
+  .figcap{font-size:11.5px;color:var(--faint);margin:8px 6px 0;font-style:italic;}
+  /* stepper */
+  .steps{display:flex;flex-direction:column;gap:8px;margin-top:14px;}
+  .step{display:grid;grid-template-columns:26px 1fr auto;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:11px 15px;box-shadow:var(--shadow);}
+  .step .n{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--accent);}
+  .step .st{font-size:14px;font-weight:650;color:var(--ink);} .step .who{font-size:12.5px;color:var(--muted);margin-top:1px;} .step .who b{color:var(--ink);}
+  .step .who .mono{font-family:var(--mono);font-size:11.5px;}
+  .badge{font-family:var(--mono);font-size:9px;letter-spacing:.05em;text-transform:uppercase;font-weight:700;padding:4px 9px;border-radius:6px;white-space:nowrap;}
+  .badge.gate{background:var(--flag-bg);color:var(--flag);} .badge.witness{background:var(--verified-bg);color:var(--verified);}
+  .consensus{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--accent);color:#fff;border-radius:11px;padding:13px 18px;margin-top:12px;box-shadow:var(--shadow);}
+  :root[data-theme="dark"] .consensus{background:var(--surface);color:var(--ink);border:1px solid var(--accent);}
+  @media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .consensus{background:var(--surface);color:var(--ink);border:1px solid var(--accent);}}
+  .consensus .dots{display:flex;gap:6px;} .consensus .dot{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-family:var(--mono);font-size:9px;font-weight:700;background:rgba(255,255,255,.16);border:1.5px solid rgba(255,255,255,.5);}
+  :root[data-theme="dark"] .consensus .dot{background:var(--accent-2);color:#0c0f1a;border-color:var(--accent);}
+  @media(prefers-color-scheme:dark){:root:not([data-theme="light"]) .consensus .dot{background:var(--accent-2);color:#0c0f1a;border-color:var(--accent);}}
+  .consensus .dot.off{opacity:.4;} .consensus .ct{font-size:13.5px;font-weight:600;}
+  .note{border-radius:10px;padding:14px 17px;font-size:13px;border:1px solid;margin-top:14px;background:var(--surface-2);border-color:var(--line-strong);color:var(--muted);}
+  .note .nl{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;display:block;margin-bottom:5px;color:var(--faint);} .note strong{color:var(--ink);}
+  footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);color:var(--faint);font-size:11.5px;}
+  @media(max-width:640px){.split{grid-template-columns:1fr;} .step{grid-template-columns:22px 1fr;} .step .badge{grid-column:2;justify-self:start;margin-top:4px;}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="eyebrow">G2P Fund-Traceability · Validators &amp; Signing Flow</span>
+    <h1>Where the validators sit, and who signs at each step.</h1>
+    <p class="lede">Two different jobs are easy to conflate. Getting them straight is the whole design: <em>validators</em> secure the ledger (who can write or rewrite it); <em>signers</em> authorize each business step (who vouches for it). Here is exactly how both work.</p>
+  </header>
+
+  <section>
+    <span class="kicker">The distinction that matters</span>
+    <h2>Validator ≠ signer</h2>
+    <div class="split">
+      <div class="card val">
+        <div class="h">◆ Validator (consensus)</div>
+        <p><b>Who can write or rewrite the ledger.</b> Four institutions each run a Besu QBFT node. <b>3 of 4 must agree to commit any record</b> — so no single institution can insert or alter a payment. This applies to <em>every</em> step, identically.</p>
+      </div>
+      <div class="card sig">
+        <div class="h">✎ Signer (authorization)</div>
+        <p><b>Who vouches for a specific step.</b> Each lifecycle step is signed with a particular institution's key (<code>msg.sender</code>). The set of required signers <em>varies per step</em> — and the smart contract rejects a step signed by the wrong party.</p>
+      </div>
+    </div>
+    <div class="note">
+      <span class="nl">Why both are needed</span>
+      Multiple independent <strong>signers</strong> alone don't make a ledger tamper-proof — rewriting history is a <strong>validator</strong> power. A chain that one operator's validators secure is rewritable by that operator, no matter how many parties signed the individual steps. Independent <em>validator custody</em> is what makes "no one can rewrite the record" true.
+    </div>
+  </section>
+
+  <section>
+    <span class="kicker">1 · Where the validators sit</span>
+    <h2>Four institutions, four nodes, 3-of-4 to commit</h2>
+    <div class="fig dg">
+      <svg viewBox="0 0 640 440" role="img" aria-label="Four validator nodes — Finance (top), Central Bank (right), Audit Court (bottom), Ministry (left) — each an independent institution holding its own node and key, all connected to a shared G2PLedger in the center. Three of the four must agree (QBFT) to commit any record.">
+        <!-- spokes -->
+        <line class="spoke" x1="320" y1="118" x2="320" y2="188"/>
+        <line class="spoke" x1="470" y1="220" x2="398" y2="220"/>
+        <line class="spoke" x1="320" y1="252" x2="320" y2="322"/>
+        <line class="spoke" x1="170" y1="220" x2="242" y2="220"/>
+        <!-- center ledger -->
+        <rect class="ledger" x="242" y="188" width="156" height="64" rx="11"/>
+        <text class="tl" x="320" y="214" text-anchor="middle">G2PLedger</text>
+        <text class="tls" x="320" y="232" text-anchor="middle">shared, append-only</text>
+        <!-- Finance (top) -->
+        <rect class="node" x="235" y="40" width="170" height="66" rx="11"/>
+        <text class="role" x="320" y="60" text-anchor="middle">Validator + signer</text>
+        <text class="t" x="320" y="79" text-anchor="middle">Finance Ministry</text>
+        <text class="s" x="320" y="95" text-anchor="middle">funds authorization</text>
+        <!-- Central Bank (right) -->
+        <rect class="node" x="468" y="187" width="168" height="66" rx="11"/>
+        <text class="role" x="552" y="207" text-anchor="middle">Validator + signer</text>
+        <text class="t" x="552" y="226" text-anchor="middle">Central Bank</text>
+        <text class="s" x="552" y="242" text-anchor="middle">releases funds</text>
+        <!-- Audit Court (bottom) -->
+        <rect class="node" x="235" y="334" width="170" height="66" rx="11"/>
+        <text class="role" x="320" y="354" text-anchor="middle">Validator + signer</text>
+        <text class="t" x="320" y="373" text-anchor="middle">Audit Court</text>
+        <text class="s" x="320" y="389" text-anchor="middle">independent · certifies</text>
+        <!-- Ministry (left) -->
+        <rect class="node" x="4" y="187" width="168" height="66" rx="11"/>
+        <text class="role" x="88" y="207" text-anchor="middle">Validator + signers</text>
+        <text class="t" x="88" y="226" text-anchor="middle">Ministry</text>
+        <text class="s" x="88" y="242" text-anchor="middle">operator·verifier·authorizer</text>
+      </svg>
+      <p class="figcap">Each institution holds its own node and key under separate legal custody. The paying banks and the NGO/observer are NOT validators — banks are external signers (they sign payout outcomes); the NGO has read-only access with the power to raise on-chain disputes.</p>
+    </div>
+    <div class="consensus">
+      <div class="dots"><span class="dot">FIN</span><span class="dot">CB</span><span class="dot">MIN</span><span class="dot off">AUD</span></div>
+      <span class="ct">Any record is committed only when <strong>3 of the 4</strong> validators agree (QBFT). Survives 1 offline/malicious node. Immediate finality — no reorgs.</span>
+    </div>
+  </section>
+
+  <section>
+    <span class="kicker">2 · Who signs at each step</span>
+    <h2>The lifecycle of one payment batch</h2>
+    <p class="sub">Read top to bottom. Each step names the required signer(s) and whether it's a <strong>hard gate</strong> (money can't advance until the signatures exist) or a <strong>witness</strong> (recorded; a missing/wrong signature flags for investigation, never freezes payments).</p>
+    <div class="steps">
+      <div class="step"><span class="n">1</span><div><div class="st">Draft — batch created</div><div class="who">Signed by <b>Ministry · Operator</b></div></div><span class="badge witness">witness</span></div>
+      <div class="step"><span class="n">2</span><div><div class="st">Verified — roster checked</div><div class="who">Signed by <b>Ministry · Verifier</b> <span class="mono">(must ≠ creator — SoD)</span></div></div><span class="badge witness">witness</span></div>
+      <div class="step"><span class="n">3</span><div><div class="st">Fund release — Central Bank → Ministry</div><div class="who">Co-signed by <b>Central Bank + Finance + Ministry</b> <span class="mono">(3-way multisig)</span></div></div><span class="badge gate">hard gate</span></div>
+      <div class="step"><span class="n">4</span><div><div class="st">Authorized — cleared to pay</div><div class="who">Signed by <b>Ministry · Authorizer</b> <span class="mono">(must ≠ creator — SoD)</span></div></div><span class="badge witness">witness</span></div>
+      <div class="step"><span class="n">5</span><div><div class="st">Sent — instruction to banks</div><div class="who">Signed by <b>Ministry · Operator</b> · freezes the instruction <code>docHash</code></div></div><span class="badge witness">witness</span></div>
+      <div class="step"><span class="n">6</span><div><div class="st">Paid — each citizen's payout</div><div class="who">Signed by the <b>paying Bank</b> <span class="mono">(ECDSA · UTR)</span> · external, mirrored on-chain</div></div><span class="badge witness">witness</span></div>
+      <div class="step"><span class="n">7</span><div><div class="st">Reconciled — control totals certified</div><div class="who">Signed by the <b>Audit Court</b> <span class="mono">(required)</span></div></div><span class="badge gate">hard gate</span></div>
+      <div class="step"><span class="n">✎</span><div><div class="st">Dispute — raised at any step</div><div class="who">By the <b>Audit Court or NGO observer</b> · permanent, un-buriable, non-blocking</div></div><span class="badge witness">any time</span></div>
+    </div>
+    <div class="consensus">
+      <div class="dots"><span class="dot">FIN</span><span class="dot">CB</span><span class="dot">MIN</span><span class="dot">AUD</span></div>
+      <span class="ct"><strong>Under every one of these steps:</strong> the record only lands when 3-of-4 validators agree. Signing says <em>"I vouch for this step"</em>; consensus says <em>"and no one can rewrite that I did."</em></span>
+    </div>
+  </section>
+
+  <section>
+    <span class="kicker">The two tiers, and the anchor</span>
+    <h2>Gate the few, witness the many</h2>
+    <p class="sub"><strong>Hard gates</strong> — the handful of high-value inter-institutional moments (fund release, final reconciliation) — require the signatures <em>before</em> proceeding. <strong>Witness</strong> — the thousands of citizen payouts — are recorded as they happen; a missing bank signature flags for investigation rather than freezing a nation's benefits. So an offline auditor can never halt payments, yet nothing escapes the record.</p>
+    <div class="note">
+      <span class="nl">And above the four validators</span>
+      A nightly Merkle root of the reconciled ledger is stamped into <strong>Bitcoin</strong> (OpenTimestamps). So even if all four validators colluded, they couldn't back-date history without also rewriting Bitcoin. Independent validators stop <em>one</em> institution; the anchor stops <em>all four together</em>.
+    </div>
+  </section>
+
+  <footer>
+    Companion to the Architecture Brief, System One-Pager, and System Architecture page. Reflects the built G2PLedger contract exactly: role-gated transitions, segregation of duties, the CB+Finance+Ministry fund-release multisig, audit-court reconciliation, and observer disputes.
+  </footer>
+</div>
+</body>
+</html>
